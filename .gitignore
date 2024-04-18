@@ -1,3 +1,10 @@
+.streamlit/
+scripts/
+others/
+venv/
+st关键字.md
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
