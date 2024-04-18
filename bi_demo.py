@@ -52,7 +52,7 @@ with st.container():
             sizer_column = sorted(df_sizer[label].unique(), reverse=False)
             selected_values = st.multiselect(label=label, options=sizer_column)
             selected_values_dict[label] = selected_values
-            if selected_values:e
+            if selected_values:
                 df_sizer = df_sizer[df_sizer[label].isin(selected_values)]
 
     with st.expander(label="（筛选后）可点击展开数据", expanded=False):  # 该项需要放在与筛选器「同一个容器中」，否则会重置状态。
