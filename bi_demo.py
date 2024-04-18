@@ -6,9 +6,10 @@ import pandas as pd
 from sqlalchemy import create_engine
 
 
+
 st.set_page_config(
     page_title='Bi-Share',  # 浏览器的标签标题，
-    page_icon='🔥',  # 标签图标，支持emoji
+    page_icon='chart_with_upwards_trend',  # 标签图标，支持emoji
     layout='wide',  # 主区域布局，默认为「居中的centered「，也可以选为「布满的wide」
     initial_sidebar_state='auto',
     # menu_items={  # 右上角文字链接，键为固定字符串
@@ -51,8 +52,11 @@ with st.container():
             sizer_column = sorted(df_sizer[label].unique(), reverse=False)
             selected_values = st.multiselect(label=label, options=sizer_column)
             selected_values_dict[label] = selected_values
-            if selected_values:
+            if selected_values:e
                 df_sizer = df_sizer[df_sizer[label].isin(selected_values)]
+
+    with st.expander(label="（筛选后）可点击展开数据", expanded=False):  # 该项需要放在与筛选器「同一个容器中」，否则会重置状态。
+        st.dataframe(df_sizer, use_container_width=True, )
 
 # === 三、数据提取  ===
 ## 1.范围筛选
@@ -389,11 +393,9 @@ def bar_area_sale(x, y, title="地区销售"):
 # === BI布局  ===
 # 数据源展开；
 # V1
-with st.expander(label="（筛选后）可点击展开数据", expanded=False):
-    st.dataframe(df_sizer, use_container_width=True, )
+# with st.expander(label="（筛选后）可点击展开数据", expanded=False):
+#     st.dataframe(df_sizer, use_container_width=True, )
 # V2 fixme ，展开器需要不受筛选器的变化旷，只收本身的状态点击改变。
-
-
 
 
 try:
@@ -402,7 +404,7 @@ try:
         # 此处放往入「平台筛选器」
         with col1:
             with st.container():  # border=True,
-                line_month(x=ls_month, y=ls_consume_month, title='月趋势')
+                line_month(x=[str(i)+"月" for i in ls_month], y=ls_consume_month, title='月趋势')
                 bar_area_sale(x=ls_area, y=ls_consume_area, title='地区趋势')
 
         with col2:
@@ -419,9 +421,13 @@ try:
             bar_phonetype(ls_phonetype, ls_consume_phonetype, title="手机型号")
 except:
     st.write('绘图出错了。')
+
 # 色系 √
 # 轴标签 √
 # 轴边距 √
 # 关联筛选器 √
 # 高度集成。
+#
+
+# tip:
 #
