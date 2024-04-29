@@ -1,5 +1,6 @@
+# v0.14 转为「圆色」柱状，去掉「网格线」。
 # v0.13 增加「颜色选择器」
-# v0.13 填加可用「鼠标滚动缩放」，清理部分不再使用的功能。
+# v0.12 填加可用「鼠标滚动缩放」，清理部分不再使用的功能。
 # v0.11 所有图基本模板，
 import streamlit as st
 from streamlit_echarts import st_pyecharts
@@ -51,7 +52,7 @@ def choose_color_ulike():
         with col_text:
             st.write("")
             st.write("")
-            st.write("当前颜色是：", (color1, color2, color3, color4))
+            # st.write("当前颜色是：", (color1, color2, color3, color4))
     return color1, color2, color3, color4
 
 
@@ -79,12 +80,30 @@ def bar_base(x_series, y1_title, y1_series, color1, y2_title, y2_series, color2,
         .add_yaxis(series_name=y1_title,  # 标题
                    y_axis=y1_series,  # 数据
                    color=color1,  # 颜色
-                   gap='1%',  # 组间距
+                   gap='5%',  # 组间距
+                   category_gap="30%",
                    stack="stack1",  # 若是相同的stack序号，则会堆叠
                    )
-        .add_yaxis(y2_title, y2_series, gap='1%', color=color2)
-        .set_series_opts(label_opts=opts.LabelOpts(is_show=True))  # is_show 标签
+        .add_yaxis(y2_title,
+                   y2_series,
+                   color=color2,
+                   gap='5%',
+                   category_gap="30%",
+                   )
+        .set_series_opts(label_opts=opts.LabelOpts(is_show=True),
+                         itemstyle_opts=opts.ItemStyleOpts(border_radius=5),  # 也可以在 .add_yaxis中生效，在这里是统一设置y
+                         )  # is_show 标签
         .set_global_opts(title_opts=opts.TitleOpts(title=pic_title, ),
+                         xaxis_opts=opts.AxisOpts(axisline_opts=opts.AxisLineOpts(is_show=True, ),  # 是否显示「轴线条」
+                                                  axislabel_opts=opts.LabelOpts(is_show=True),  # 是否显示「轴标签」
+                                                  splitline_opts=opts.SplitLineOpts(is_show=False),  # 去y轴网格线
+                                                  boundary_gap=True  # 与轴是否有距离
+                                                  ),
+                         yaxis_opts=opts.AxisOpts(axisline_opts=opts.AxisLineOpts(is_show=True, ),  # 是否显示「轴线条」
+                                                  axislabel_opts=opts.LabelOpts(is_show=True),  # 是否显示「轴标签」
+                                                  splitline_opts=opts.SplitLineOpts(is_show=False),  # 去y轴网格线
+                                                  boundary_gap=True  # 与轴是否有距离
+                                                  ),
                          datazoom_opts=opts.DataZoomOpts(type_="inside", range_start=0, range_end=100),  # 滚轮缩放
                          )
     )
@@ -124,8 +143,20 @@ def bar_percent(x_series, y1_title, y1_series, color1, y2_title, y2_series, colo
         .set_series_opts(label_opts=opts.LabelOpts(position="right",
                                                    formatter=JsCode(
                                                        "function(x){return Number(x.data.percent * 100).toFixed() + '%';}"),
-                                                   ))
+                                                   ),
+                         itemstyle_opts=opts.ItemStyleOpts(border_radius=5),
+                         )
         .set_global_opts(title_opts=opts.TitleOpts(title=pic_title),
+                         xaxis_opts=opts.AxisOpts(axisline_opts=opts.AxisLineOpts(is_show=True, ),  # 是否显示「轴线条」
+                                                  axislabel_opts=opts.LabelOpts(is_show=True),  # 是否显示「轴标签」
+                                                  splitline_opts=opts.SplitLineOpts(is_show=False),  # 去y轴网格线
+                                                  boundary_gap=True  # 与轴是否有距离
+                                                  ),
+                         yaxis_opts=opts.AxisOpts(axisline_opts=opts.AxisLineOpts(is_show=True, ),  # 是否显示「轴线条」
+                                                  axislabel_opts=opts.LabelOpts(is_show=True),  # 是否显示「轴标签」
+                                                  splitline_opts=opts.SplitLineOpts(is_show=False),  # 去y轴网格线
+                                                  boundary_gap=True  # 与轴是否有距离
+                                                  ),
                          datazoom_opts=opts.DataZoomOpts(type_="inside", range_start=0, range_end=100),  # 滚轮缩放
                          )
     )
@@ -141,8 +172,21 @@ def bar_tool(x_series, y1_title, y1_series, color1, y2_title, y2_series, color2,
         .add_xaxis(x_series)
         .add_yaxis(series_name=y1_title, y_axis=y1_series, gap='2%', color=color1)  # gap，系列「间距」
         .add_yaxis(series_name=y2_title, y_axis=y2_series, gap='2%', color=color2)  # color颜色设置
+        .set_series_opts(label_opts=opts.LabelOpts(is_show=True),
+                         itemstyle_opts=opts.ItemStyleOpts(border_radius=5),
+                         )
         .set_global_opts(title_opts=opts.TitleOpts(title=pic_title),  # y轴名称
                          toolbox_opts=opts.ToolboxOpts(),  # 工具箱
+                         xaxis_opts=opts.AxisOpts(axisline_opts=opts.AxisLineOpts(is_show=True, ),  # 是否显示「轴线条」
+                                                  axislabel_opts=opts.LabelOpts(is_show=True),  # 是否显示「轴标签」
+                                                  splitline_opts=opts.SplitLineOpts(is_show=False),  # 去y轴网格线
+                                                  boundary_gap=True  # 与轴是否有距离
+                                                  ),
+                         yaxis_opts=opts.AxisOpts(axisline_opts=opts.AxisLineOpts(is_show=True, ),  # 是否显示「轴线条」
+                                                  axislabel_opts=opts.LabelOpts(is_show=True),  # 是否显示「轴标签」
+                                                  splitline_opts=opts.SplitLineOpts(is_show=False),  # 去y轴网格线
+                                                  boundary_gap=True  # 与轴是否有距离
+                                                  ),
                          datazoom_opts=opts.DataZoomOpts(type_="inside", range_start=0, range_end=100),  # 滚轮缩放
                          )
     )
@@ -268,34 +312,40 @@ def mix_bar_and_line(x_series, y1_title, y1_series, color1, y2_title, y2_series,
                    y_axis=y1_series,
                    color=color1,
                    # label_opts=opts.LabelOpts(is_show=False),
+                   gap="5%"
                    )
         .add_yaxis(series_name=y2_title,  ## y轴主轴第2组数据设置
                    y_axis=y2_series,
                    color=color2,
                    # label_opts=opts.LabelOpts(is_show=False),
+                   gap="5%"
                    )
         ## y轴副轴数据设置
         .extend_axis(yaxis=opts.AxisOpts(name=y3_title,
                                          type_="value",
+                                         axisline_opts=opts.AxisLineOpts(is_show=True, ),  # 是否显示「轴线条」
+                                         splitline_opts=opts.SplitLineOpts(is_show=False),  # 去y轴网格线
                                          # min_=0,
                                          # max_=25,
                                          # interval=5,
                                          # axislabel_opts=opts.LabelOpts(formatter="{value} °C"),
-                                         ))
-        .set_series_opts(label_opts=opts.LabelOpts(is_show=False))
+                                         ),
+                     )
+
+        .set_series_opts(label_opts=opts.LabelOpts(is_show=False),
+                         itemstyle_opts=opts.ItemStyleOpts(border_radius=5), )
         .set_global_opts(tooltip_opts=opts.TooltipOpts(is_show=True, trigger="axis", axis_pointer_type="cross"),
-                         xaxis_opts=opts.AxisOpts(type_="category",
-                                                  axispointer_opts=opts.AxisPointerOpts(is_show=True, type_="shadow"),
+                         xaxis_opts=opts.AxisOpts(type_="category", axisline_opts=opts.AxisLineOpts(is_show=True, ),
+                                                  # 是否显示「轴线条」
+                                                  axislabel_opts=opts.LabelOpts(is_show=True, ),  # 是否显示「轴标签」
+                                                  splitline_opts=opts.SplitLineOpts(is_show=False),  # 去y轴网格线
+                                                  boundary_gap=True,  # 与轴是否有距离
                                                   ),
-                         # yaxis_opts=opts.AxisOpts(name="水量",  # y轴主轴其它设置
-                         #                          type_="value",
-                         #                          min_=0,
-                         #                          max_=50,  # 250, #y轴最大值， None|int
-                         #                          interval=10,  # 间隔
-                         #                          axislabel_opts=opts.LabelOpts(formatter="{value} ml"),  # 单位
-                         #                          axistick_opts=opts.AxisTickOpts(is_show=True),
-                         #                          splitline_opts=opts.SplitLineOpts(is_show=True),
-                         #                          ),
+                         yaxis_opts=opts.AxisOpts(axisline_opts=opts.AxisLineOpts(is_show=True, ),  # 是否显示「轴线条」
+                                                  axislabel_opts=opts.LabelOpts(is_show=True),  # 是否显示「轴标签」
+                                                  splitline_opts=opts.SplitLineOpts(is_show=False),  # 去y轴网格线
+                                                  boundary_gap=True  # 与轴是否有距离
+                                                  ),
                          title_opts=opts.TitleOpts(title=pic_title),  # y轴名称
                          datazoom_opts=opts.DataZoomOpts(type_="inside", range_start=0, range_end=100),  # 滚轮缩放
                          )
@@ -315,35 +365,6 @@ def mix_bar_and_line(x_series, y1_title, y1_series, color1, y2_title, y2_series,
     st_pyecharts(bar.overlap(line), height=height, width="100%")
 
 
-# 标记数值点
-def bar_mark_point():
-    """标记数值点"""
-    from pyecharts import options as opts
-    from pyecharts.charts import Bar
-    from pyecharts.faker import Faker
-    from streamlit_echarts import st_pyecharts
-
-    c = (
-        Bar()
-        .add_xaxis(Faker.choose())
-        .add_yaxis("商家A", Faker.values())
-        .add_yaxis("商家B", Faker.values())
-        .set_global_opts(title_opts=opts.TitleOpts(title="Bar-数值特征"))
-        .set_series_opts(
-            label_opts=opts.LabelOpts(is_show=False),
-            markpoint_opts=opts.MarkPointOpts(
-                data=[
-                    opts.MarkPointItem(type_="max", name="最大值"),
-                    opts.MarkPointItem(type_="min", name="最小值"),
-                    opts.MarkPointItem(type_="average", name="平均值"),
-                ]
-            ),
-        )
-        # .render("bar_markpoint_type.html")
-    )
-    st_pyecharts(c)
-
-
 # 标记「辅助线 & 指定点」
 def bar_mark_line_and_point(x_series, y1_title, y1_series, color1, pic_title, height):
     """标记「辅助线 & 指定点」"""
@@ -351,10 +372,11 @@ def bar_mark_line_and_point(x_series, y1_title, y1_series, color1, pic_title, he
     c = (
         Bar()
         .add_xaxis(x_series)
-        .add_yaxis(y1_title, y1_series, color=color1)
+        .add_yaxis(y1_title, y1_series, color=color1, )
         # .add_yaxis("商家B", Faker.values())
 
         .set_series_opts(label_opts=opts.LabelOpts(is_show=False),
+                         itemstyle_opts=opts.ItemStyleOpts(border_radius=5),
                          markline_opts=opts.MarkLineOpts(data=[opts.MarkLineItem(type_="average", name="平均值"),
                                                                # opts.MarkLineItem(type_="min", name="最小值"),
                                                                # opts.MarkLineItem(type_="max", name="最大值"),
@@ -365,39 +387,20 @@ def bar_mark_line_and_point(x_series, y1_title, y1_series, color1, pic_title, he
                                                                  ]),
                          )
         .set_global_opts(title_opts=opts.TitleOpts(title=pic_title),
+                         xaxis_opts=opts.AxisOpts(axisline_opts=opts.AxisLineOpts(is_show=True, ),  # 是否显示「轴线条」
+                                                  axislabel_opts=opts.LabelOpts(is_show=True),  # 是否显示「轴标签」
+                                                  splitline_opts=opts.SplitLineOpts(is_show=False),  # 去y轴网格线
+                                                  boundary_gap=True  # 与轴是否有距离
+                                                  ),
+                         yaxis_opts=opts.AxisOpts(axisline_opts=opts.AxisLineOpts(is_show=True, ),  # 是否显示「轴线条」
+                                                  axislabel_opts=opts.LabelOpts(is_show=True),  # 是否显示「轴标签」
+                                                  splitline_opts=opts.SplitLineOpts(is_show=False),  # 去y轴网格线
+                                                  boundary_gap=True  # 与轴是否有距离
+                                                  ),
                          datazoom_opts=opts.DataZoomOpts(type_="inside", range_start=0, range_end=100),  # 滚轮缩放
                          )
     )
     st_pyecharts(c, height=height, width="100%")
-
-
-# 标记指定数值点
-def bar_custom_point():
-    """标记自定义数值点"""
-    from pyecharts import options as opts
-    from pyecharts.charts import Bar
-    from pyecharts.faker import Faker
-
-    x, y = Faker.choose(), Faker.values()
-    c = (
-        Bar()
-        .add_xaxis(x)
-        .add_yaxis(
-            "商家A",
-            y,
-            markpoint_opts=opts.MarkPointOpts(
-                data=[
-                    opts.MarkPointItem(name="自定义标记点", coord=[x[2], y[2]], value=y[2]),
-                    opts.MarkPointItem(name="自定义标记点", coord=[x[3], y[3]], value=y[3]),
-                ]  # 索引从0开始
-            ),
-        )
-        .add_yaxis("商家B", Faker.values())
-        .set_global_opts(title_opts=opts.TitleOpts(title="Bar-指定点标记"))
-        .set_series_opts(label_opts=opts.LabelOpts(is_show=False))
-        # .render("bar_markpoint_custom.html")
-    )
-    st_pyecharts(c)
 
 
 # 标记自定义辅助线
@@ -424,41 +427,6 @@ def custom_mark_line():
     st_pyecharts(c)
 
 
-# 改变方形柱条
-def bar_radius():
-    """改变方形柱条"""
-    from pyecharts import options as opts
-    from pyecharts.charts import Bar
-    from pyecharts.commons.utils import JsCode
-    from pyecharts.faker import Faker
-
-    c = (
-        Bar()
-        .add_xaxis(Faker.choose())
-        .add_yaxis("商家A", Faker.values(), category_gap="60%")
-        .set_series_opts(
-            itemstyle_opts={
-                "normal": {
-                    "color": JsCode(
-                        """new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
-                    offset: 0,
-                    color: 'rgba(0, 244, 255, 1)'
-                }, {
-                    offset: 1,
-                    color: 'rgba(0, 77, 167, 1)'
-                }], false)"""
-                    ),
-                    "barBorderRadius": [30, 30, 30, 30],
-                    "shadowColor": "rgb(0, 160, 221)",
-                }
-            }
-        )
-        .set_global_opts(title_opts=opts.TitleOpts(title="Bar-渐变圆柱"))
-        # .render("bar_border_radius.html")
-    )
-    st_pyecharts(c, )
-
-
 # 可互动选择展示日期区间
 def bar_days_zoom(x_series, y1_title, y1_series, color1, pic_title, height):
     """可互动选择展示日期区间"""
@@ -470,52 +438,24 @@ def bar_days_zoom(x_series, y1_title, y1_series, color1, pic_title, height):
         .add_xaxis(x_series)
         .add_yaxis(y1_title, y1_series, stack="stack1", color=color1)
         # .add_yaxis("商家B", Faker.days_values,stack="stack1") # 过多花眼，不适合多字段
+        .set_series_opts(itemstyle_opts=opts.ItemStyleOpts(border_radius=5), )
         .set_global_opts(
             title_opts=opts.TitleOpts(title=pic_title),
-            # datazoom_opts=opts.DataZoomOpts(range_start=50, range_end=100, ),  # 默认展示区间
+            xaxis_opts=opts.AxisOpts(axisline_opts=opts.AxisLineOpts(is_show=True, ),  # 是否显示「轴线条」
+                                     axislabel_opts=opts.LabelOpts(is_show=True),  # 是否显示「轴标签」
+                                     splitline_opts=opts.SplitLineOpts(is_show=False),  # 去y轴网格线
+                                     boundary_gap=True  # 与轴是否有距离
+                                     ),
+            yaxis_opts=opts.AxisOpts(axisline_opts=opts.AxisLineOpts(is_show=True, ),  # 是否显示「轴线条」
+                                     axislabel_opts=opts.LabelOpts(is_show=True),  # 是否显示「轴标签」
+                                     splitline_opts=opts.SplitLineOpts(is_show=False),  # 去y轴网格线
+                                     boundary_gap=True  # 与轴是否有距离
+                                     ),
             datazoom_opts=[opts.DataZoomOpts(range_start=50, range_end=100, ),  # 「日期区间」滑动
                            opts.DataZoomOpts(type_="inside")],  # 数据区域可缩放
         )
     )
     st_pyecharts(c, height=height, width="100%")
-
-
-# 滚轮缩放
-def bar_zoom():  # x_series,  y1_title, y1_series, pic_title, height
-    """滑轮可放大缩小"""
-    pic_title = "滚轮缩放"
-    x_series = [(datetime.today() + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(30)]
-    y1_series = [random.randint(1, 100) for i in range(30)]
-    c = (
-        Bar()
-        .add_xaxis(x_series)
-        .add_yaxis("商家A", y1_series, color=color1)
-        .set_global_opts(
-            title_opts=opts.TitleOpts(title=pic_title),
-            datazoom_opts=opts.DataZoomOpts(type_="inside"),  # 滚轮缩放
-        )
-        # .render("bar_datazoom_inside.html")
-    )
-    st_pyecharts(c)
-
-
-# 可互动鼠标滑轮可放大缩小&带时间轴
-def zoom_data_date():
-    """带时间轴缩放"""
-    from pyecharts import options as opts
-    from pyecharts.charts import Bar
-    from pyecharts.faker import Faker
-
-    c = (
-        Bar()
-        .add_xaxis(Faker.days_attrs)
-        .add_yaxis("商家A", Faker.days_values, color=Faker.rand_color())
-        .set_global_opts(
-            title_opts=opts.TitleOpts(title="Bar-时间轴缩放"),
-            datazoom_opts=[opts.DataZoomOpts(), opts.DataZoomOpts(type_="inside")],
-        )
-    )
-    st_pyecharts(c)
 
 
 # 瀑布图
@@ -551,8 +491,18 @@ def bar_waterfall(x_series, y1_title, y1_series, color1, y2_title, y2_series, co
         .add_yaxis(series_name=y2_title, y_axis=y2_series, color=color2, stack="总量")
         .set_series_opts(label_opts=opts.LabelOpts(is_show=False), )
         .set_global_opts(
-            yaxis_opts=opts.AxisOpts(type_="value"),
             title_opts=opts.TitleOpts(title=pic_title),  # y轴名称
+            xaxis_opts=opts.AxisOpts(axisline_opts=opts.AxisLineOpts(is_show=True, ),  # 是否显示「轴线条」
+                                     axislabel_opts=opts.LabelOpts(is_show=True),  # 是否显示「轴标签」
+                                     splitline_opts=opts.SplitLineOpts(is_show=False),  # 去y轴网格线
+                                     boundary_gap=True  # 与轴是否有距离
+                                     ),
+            yaxis_opts=opts.AxisOpts(type_="value",
+                                     axisline_opts=opts.AxisLineOpts(is_show=True, ),  # 是否显示「轴线条」
+                                     axislabel_opts=opts.LabelOpts(is_show=True),  # 是否显示「轴标签」
+                                     splitline_opts=opts.SplitLineOpts(is_show=False),  # 去y轴网格线
+                                     boundary_gap=True  # 与轴是否有距离
+                                     ),
             datazoom_opts=opts.DataZoomOpts(type_="inside", range_start=0, range_end=100),  # 滚轮缩放
         )
     )
@@ -562,50 +512,62 @@ def bar_waterfall(x_series, y1_title, y1_series, color1, y2_title, y2_series, co
 # 条形图
 def bar_reverse(x_series, y1_title, y1_series, color1, y2_title, y2_series, color2, pic_title, height):
     pic_title = "Bar-条形图"
-    """条形图"""
+    height = "600px"
+    # """条形图"""
     c = (
         Bar()
         .add_xaxis(x_series)
-        .add_yaxis(y1_title, y1_series)
-        .add_yaxis(y2_title, y2_series)
+        .add_yaxis(y1_title, y1_series, color=color1, category_gap="40%", gap="5%")
+        .add_yaxis(y2_title, y2_series, color=color2, category_gap="40%", gap="5%")
         .reversal_axis()
-        .set_series_opts(label_opts=opts.LabelOpts(position="right"))
+        .set_series_opts(label_opts=opts.LabelOpts(position="right"),
+                         itemstyle_opts=opts.ItemStyleOpts(border_radius=5),
+                         )
         .set_global_opts(title_opts=opts.TitleOpts(title=pic_title),
+                         xaxis_opts=opts.AxisOpts(axisline_opts=opts.AxisLineOpts(is_show=False, ),  # 是否显示「轴线条」
+                                                  axislabel_opts=opts.LabelOpts(is_show=False),  # 是否显示「轴标签」
+                                                  splitline_opts=opts.SplitLineOpts(is_show=False),  # 去y轴网格线
+                                                  boundary_gap=True  # 与轴是否有距离
+                                                  ),
+                         yaxis_opts=opts.AxisOpts(axisline_opts=opts.AxisLineOpts(is_show=True, ),  # 是否显示「轴线条」
+                                                  axislabel_opts=opts.LabelOpts(is_show=True),  # 是否显示「轴标签」
+                                                  splitline_opts=opts.SplitLineOpts(is_show=False),  # 去y轴网格线
+                                                  boundary_gap=True  # 与轴是否有距离
+                                                  ),
+                         datazoom_opts=opts.DataZoomOpts(type_="inside", range_start=0, range_end=100),  # 滚轮缩放
                          )
     )
-    st_pyecharts(c, height=height * 2, width="100%")
-
-
-# 直方图
-def bar_histogram(x_series, y1_title, y1_series, color1, pic_title, height):
-    pic_title = "直方图"
-    """直方图"""
-    c = (
-        Bar()
-        .add_xaxis(x_series)
-        .add_yaxis(y1_title, y1_series, category_gap=0, color="#fdae61")
-        .set_global_opts(title_opts=opts.TitleOpts(title=pic_title))
-    )
     st_pyecharts(c, height=height, width="100%")
-
 
 # 堆叠
 def bar_stack(x_series, y1_title, y1_series, color1, y2_title, y2_series, color2, y3_title, y3_series,
               color3, color4, pic_title, height):
-    pic_title = "堆叠&不显"
+    pic_title = "堆叠不显"
     y4_title = "不显"
     """堆叠"""
     c = (
         Bar()
         .add_xaxis(x_series)
-        .add_yaxis(y1_title, y1_series, color=color1, stack="stack1")  # stack是堆放的「组别」，相同的数字会堆叠在一起
-        .add_yaxis(y2_title, y2_series, color=color2, stack="stack1")
-        .add_yaxis(y3_title, y3_series, color=color3, stack="stack2")  # 有多少y轴数据依次添加
-        .add_yaxis(y4_title, y3_series, color=color4, stack="stack3")  # 有多少y轴数据依次添加
-        .set_series_opts(label_opts=opts.LabelOpts(is_show=True))  # is_show 标签
+        .add_yaxis(y1_title, y1_series, color=color1, stack="stack1",gap="5%")  # stack是堆放的「组别」，相同的数字会堆叠在一起
+        .add_yaxis(y2_title, y2_series, color=color2, stack="stack1",gap="5%",category_gap="30%")
+        .add_yaxis(y3_title, y3_series, color=color3, stack="stack2",gap="5%",category_gap="30%")  # 有多少y轴数据依次添加
+        .add_yaxis(y4_title, y3_series, color=color4, stack="stack3",gap="5%",category_gap="30%")  # 有多少y轴数据依次添加
+        .set_series_opts(label_opts=opts.LabelOpts(is_show=True),
+                         itemstyle_opts=opts.ItemStyleOpts(border_radius=5),
+                         )
         .set_global_opts(
             title_opts=opts.TitleOpts(title=pic_title),
             legend_opts=opts.LegendOpts(selected_map={y4_title: False}),  # 不显示某列
+            xaxis_opts=opts.AxisOpts(axisline_opts=opts.AxisLineOpts(is_show=True, ),  # 是否显示「轴线条」
+                                     axislabel_opts=opts.LabelOpts(is_show=True),  # 是否显示「轴标签」
+                                     splitline_opts=opts.SplitLineOpts(is_show=False),  # 去y轴网格线
+                                     boundary_gap=True  # 与轴是否有距离
+                                     ),
+            yaxis_opts=opts.AxisOpts(axisline_opts=opts.AxisLineOpts(is_show=True, ),  # 是否显示「轴线条」
+                                     axislabel_opts=opts.LabelOpts(is_show=True),  # 是否显示「轴标签」
+                                     splitline_opts=opts.SplitLineOpts(is_show=False),  # 去y轴网格线
+                                     boundary_gap=True  # 与轴是否有距离
+                                     ),
             datazoom_opts=opts.DataZoomOpts(type_="inside", range_start=0, range_end=100),  # 滚轮缩放
         )  # title是标题
     )

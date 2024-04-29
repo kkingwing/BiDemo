@@ -7,24 +7,25 @@ from pyecharts.charts import Line, Grid
 from pyecharts.faker import Faker
 from streamlit_echarts import st_pyecharts
 import random
+from pyecharts.commons.utils import JsCode
 
 # 注：x数据需要是字符串，若是数值，会标点错位。
 x, y = Faker.choose(), Faker.values()  ## === 常量： x y 数据源
 
 
-# 基本图（含所有常使用的参数）
-def line_base(x_series, y1_title, y1_series, color1, y2_title, y2_series, color2, pic_title, height):
-    pic_title="Line-基本图"
+# 单线基本图
+def line_single_base(x_series, y1_title, y1_series, color1, pic_title, height):
+    pic_title = "Line-基本图"
     # 定义要绘制的详细内容
     l = (  # 以下这种每换行的写法是「链式调用」，每次运行完都会返回自身，实际是 l.line()  l.add_xaxis(x)  ……
         Line()  # === 图表类型
         .add_xaxis(x_series)  # === x轴
         .add_yaxis(series_name=y1_title,  # === y轴  # 系列名称
                    y_axis=y1_series,  # 数据
-                   color=color1,#"#d14a61",  # 红色。 对这个数据系列都使用这个颜色，包括：线条、标记、图例等。
+                   color=color1,  # "#d14a61",  # 红色。 对这个数据系列都使用这个颜色，包括：线条、标记、图例等。
                    # areastyle_opts=opts.AreaStyleOpts(opacity=0.1),  # 面积图， opacity 不透视明度
                    # is_smooth=True, # 曲线
-                   label_opts=opts.LabelOpts(is_show=False),  # 标签. 下方系列生效，其它系列不生效要其设置为False
+                   # label_opts=opts.LabelOpts(is_show=False),  # 标签. 下方系列生效，其它系列不生效要其设置为False
                    # linestyle_opts=opts.LineStyleOpts(width=1),  # 「y轴线条不包含标点」的设置，一般不用，color="green"
                    # is_connect_nones=True,  # 跳过null空点连接
                    # is_symbol_show = False, # 是否显示标记点
@@ -41,28 +42,16 @@ def line_base(x_series, y1_title, y1_series, color1, y2_title, y2_series, color2
                                                          ], ),
 
                    )
-        .add_yaxis(y2_title,  # 第2条y数据，参数参考上方参数。
-                   y2_series,
-                   color=color2,# "#6e9ef1",  # 蓝色。
-                   label_opts=opts.LabelOpts(is_show=False),
-                   markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(name="最小值", type_="min"),
-                                                           opts.MarkPointItem(name="最大值", type_="max")]),
-                   markline_opts=opts.MarkLineOpts(data=[opts.MarkLineItem(name="平均线", type_="average")]),
-                   )
         .set_series_opts(label_opts=opts.LabelOpts(is_show=False),  # 标签。 「方法：「所有数据系列」的统一设置，会覆盖上方的系列内的设置
-                         # areastyle_opts=opts.AreaStyleOpts(opacity=0.3),  # 面积图，不透视明度，
+                         # areastyle_opts=opts.AreaStyleOpts(opacity=0.3),  # 面积的不透视明度，
                          )
 
         # 全局设置，会覆盖上面的参数设置。
         .set_global_opts(title_opts=opts.TitleOpts(title=pic_title),  # 标题。 「方法： 全局设置」
                          legend_opts=opts.LegendOpts(type_="scroll",  # 图例 -> 过长图例可滚动
                                                      orient="horizontal",  # 「图例」调整， # horizontal 水平，  vertical 垂直的
-                                                     selected_map={"商家B": False,  # 将某数据系列不显示
-                                                                   "商家C": False,
-                                                                   "商家D": False,
-                                                                   "商家E": False,
-                                                                   "商家F": False,
-                                                                   },
+                                                     # selected_map={"商家B": False,  # 将某数据系列不显示
+                                                     #               },
                                                      pos_left=None,  # 左边距，默认居中。 "35%"
                                                      pos_top=None,  # 上边距  "0%"
                                                      ),
@@ -84,78 +73,192 @@ def line_base(x_series, y1_title, y1_series, color1, y2_title, y2_series, color2
                                                   # min_=30, # y轴最小值，起始点非0
                                                   # max_=200, # y轴最大值
                                                   name="金额",  # y轴轴标题
-                                                  axislabel_opts=opts.LabelOpts(formatter="{value}"),  # y轴标签格式单位
+                                                  # axislabel_opts=opts.LabelOpts(formatter="{value}"),  # y轴标签格式单位
                                                   ),
                          # 互动提示，其它图表的参数一致可用。
                          tooltip_opts=opts.TooltipOpts(trigger="axis",  # 鼠标移动时显示两轴标签
                                                        axis_pointer_type="cross",
-                                                       formatter="{b} {c}亿",  # 互动提示
+                                                       # formatter="{b} {c}",  # 互动提示 # 增加这个的互动效果差
                                                        ),
                          datazoom_opts=opts.DataZoomOpts(type_="inside", range_start=0, range_end=100),  # 滚轮缩放
                          )
     )
 
-    # 创建网格布局，偏移边距，使轴标签可以显示完全。
-    grid = Grid()
+    grid = Grid()  # 创建网格布局，偏移边距，使轴标签可以显示完全。
     grid.add(l, grid_opts=opts.GridOpts(pos_left="10%", pos_right="10%"))
-
-    st_pyecharts(chart=grid,
-                 height="300px",  # 图表高度
-                 # theme="light",  # 主题色 （上面在「数据系列」定义的细节好颜色后，这里一般不使用，这里写light不生效。）另一色系是dark
-                 width="100%",  # 这个是全显示的意思， 不是缩放，一般不变。
-                 )
+    st_pyecharts(chart=grid, height=height, width="100%")
 
 
-# 面积图
-def line_simple_area():
-    c = (
-        Line()
-        .add_xaxis(Faker.choose())
-        .add_yaxis("商家A", Faker.values(), areastyle_opts=opts.AreaStyleOpts(opacity=0.5), is_smooth=True)  # 加圆滑参数
-        .add_yaxis("商家B", Faker.values(), areastyle_opts=opts.AreaStyleOpts(opacity=0.5))
-
-        .set_series_opts(
-            areastyle_opts=opts.AreaStyleOpts(opacity=0.5),
-            label_opts=opts.LabelOpts(is_show=False),  # 不显示标签
-        )
-        .set_global_opts(
-            title_opts=opts.TitleOpts(title="Line-面积图"),
-            # xaxis_opts=opts.AxisOpts(  # 附着两边，取消与y轴的空隙
-            #     axistick_opts=opts.AxisTickOpts(is_align_with_label=True),
-            #     is_scale=False,
-            #     boundary_gap=False, )
-        )
-        # .render("line_area_style.html")
-    )
-    st_pyecharts(c)
-
-
-# 圆弧面积图
-def line_area():
-    import pyecharts.options as opts
-    from pyecharts.charts import Line
-    from pyecharts.faker import Faker
-
+# 基本面积图
+def line_area(x_series, y1_title, y1_series, color1, pic_title, height):
+    pic_title = "Line-基本面积图"
     l = (
         Line()
-        .add_xaxis(Faker.choose())
-        .add_yaxis("商家A", Faker.values(), is_smooth=True)
-        .add_yaxis("商家B", Faker.values(), is_smooth=True)
+        .add_xaxis(x_series)
+        .add_yaxis(y1_title, y1_series, color=color1,
+                   areastyle_opts=opts.AreaStyleOpts(opacity=0.1),  # 面积图， opacity 不透视明度
+                   is_smooth=False,  # 曲线
+                   label_opts=opts.LabelOpts(is_show=True),  #
+                   markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(name="最小值", type_="min"),  # 数据特征->标点
+                                                           opts.MarkPointItem(name="最大值", type_="max"),
+                                                           ], ),
+                   markline_opts=opts.MarkLineOpts(data=[opts.MarkLineItem(name="平均线", type_="average"),  # 数据特征->标线
+                                                         ], ),
+                   )
         .set_series_opts(
-            areastyle_opts=opts.AreaStyleOpts(opacity=0.5),
             label_opts=opts.LabelOpts(is_show=False),
         )
         .set_global_opts(
-            title_opts=opts.TitleOpts(title="Line-圆弧面积图"),
-            xaxis_opts=opts.AxisOpts(
-                axistick_opts=opts.AxisTickOpts(is_align_with_label=True),
-                is_scale=False,
-                boundary_gap=False,
-            ),
+            title_opts=opts.TitleOpts(title=pic_title),
+            xaxis_opts=opts.AxisOpts(axisline_opts=opts.AxisLineOpts(is_show=True),  # 是否显示「轴线条」
+                                     splitline_opts=opts.SplitLineOpts(is_show=False),  # 去x轴网格线
+                                     axistick_opts=opts.AxisTickOpts(is_align_with_label=True),
+                                     boundary_gap=False,  # 是否x第1个贴靠在y轴上开始。
+                                     is_show=True,  # x轴的轴身是否显示
+                                     offset=10,  # 轴数值偏移
+                                     name="品类",  # x轴名称
+                                     ),
+            yaxis_opts=opts.AxisOpts(axisline_opts=opts.AxisLineOpts(is_show=True, ),  # 是否显示「轴线条」
+                                     splitline_opts=opts.SplitLineOpts(is_show=False),  # 去y轴网格线
+                                     name="金额",  # y轴轴标题
+                                     ),
+            # 互动提示，提示最大小值，取消注释可显示值内容而非最大小值。
+            tooltip_opts=opts.TooltipOpts(trigger="axis",  # item，axis # 鼠标移动时显示两轴标签
+                                          trigger_on="mousemove",
+                                          axis_pointer_type="cross",
+                                          # formatter="{b} {c}",  # 互动提示 # 增加这个的互动效果差
+                                          ),
+            datazoom_opts=opts.DataZoomOpts(type_="inside", range_start=0, range_end=100),  # 滚轮缩放
         )
-        # .render("line_areastyle_boundary_gap.html")
     )
-    st_pyecharts(l)
+    grid = Grid() # 创建网格布局，偏移边距，使轴标签可以显示完全。
+    grid.add(l, grid_opts=opts.GridOpts(pos_left="10%", pos_right="10%"))
+    st_pyecharts(chart=grid, height=height, width="100%")
+
+
+# 双线基本图（含所有常使用的参数）
+def line_base(x_series, y1_title, y1_series, color1, y2_title, y2_series, color2, pic_title, height):
+    pic_title = "Line-隐藏数据"
+    # 定义要绘制的详细内容
+    l = (  # 以下这种每换行的写法是「链式调用」，每次运行完都会返回自身，实际是 l.line()  l.add_xaxis(x)  ……
+        Line()  # === 图表类型
+        .add_xaxis(x_series)  # === x轴
+        .add_yaxis(series_name=y1_title,  # === y轴  # 系列名称
+                   y_axis=y1_series,  # 数据
+                   color=color1,  # "#d14a61",  # 红色。 对这个数据系列都使用这个颜色，包括：线条、标记、图例等。
+                   # areastyle_opts=opts.AreaStyleOpts(opacity=0.1),  # 面积图， opacity 不透视明度
+                   # is_smooth=True, # 曲线
+                   label_opts=opts.LabelOpts(is_show=False),  # 标签. 下方系列生效，其它系列不生效要其设置为False
+                   # linestyle_opts=opts.LineStyleOpts(width=1),  # 「y轴线条不包含标点」的设置，一般不用，color="green"
+                   # is_connect_nones=True,  # 跳过null空点连接
+                   # is_symbol_show = False, # 是否显示标记点
+                   # is_step = True, # 阶梯样式
+                   markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(name="最小值", type_="min"),  # 数据特征->标点
+                                                           opts.MarkPointItem(name="最大值", type_="max"),
+                                                           # opts.MarkPointItem(name="平均值",ttype_="average")
+                                                           # opts.MarkPointItem(name="指定", coord=[x[2], y[2]], value=y[2])
+                                                           ], ),
+                   markline_opts=opts.MarkLineOpts(data=[opts.MarkLineItem(name="平均线", type_="average"),  # 数据特征->标线
+                                                         # opts.MarkLineItem(name="最小线",type_="min"),
+                                                         # opts.MarkLineItem(name="最大线",type_="max"),
+                                                         # opts.MarkLineItem(name="自定义线", y=100),
+                                                         ], ),
+
+                   )
+        .add_yaxis(y2_title,  # 第2条y数据，参数参考上方参数。
+                   y2_series,
+                   color=color2,  # "#6e9ef1",  # 蓝色。
+                   label_opts=opts.LabelOpts(is_show=False),
+                   markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(name="最小值", type_="min"),
+                                                           opts.MarkPointItem(name="最大值", type_="max")]),
+                   markline_opts=opts.MarkLineOpts(data=[opts.MarkLineItem(name="平均线", type_="average")]),
+                   )
+        .set_series_opts(label_opts=opts.LabelOpts(is_show=False),  # 标签。 「方法：「所有数据系列」的统一设置，会覆盖上方的系列内的设置
+                         # areastyle_opts=opts.AreaStyleOpts(opacity=0.3),  # 面积图，不透视明度，
+                         )
+
+        # 全局设置，会覆盖上面的参数设置。
+        .set_global_opts(title_opts=opts.TitleOpts(title=pic_title),  # 标题。 「方法： 全局设置」
+                         legend_opts=opts.LegendOpts(type_="scroll",  # 图例 -> 过长图例可滚动
+                                                     orient="horizontal",  # 「图例」调整， # horizontal 水平，  vertical 垂直的
+                                                     selected_map={"商家A": False,  # 将某数据系列不显示
+                                                                   "商家C": False,
+                                                                   },
+                                                     pos_left=None,  # 左边距，默认居中。 "35%"
+                                                     pos_top=None,  # 上边距  "0%"
+                                                     ),
+                         xaxis_opts=opts.AxisOpts(axisline_opts=opts.AxisLineOpts(is_show=True),  # 是否显示「轴线条」
+                                                  splitline_opts=opts.SplitLineOpts(is_show=False),  # 去x轴网格线
+                                                  axistick_opts=opts.AxisTickOpts(is_align_with_label=True),  # 是否「贴靠到轴」
+                                                  boundary_gap=True,  # 中间点于「轴还是中间」,True在网格中间
+                                                  is_show=True,  # x轴的轴身是否显示
+                                                  min_=0,  # x轴最小值，只在数值时起效   # 注意，横轴不能是数值，只能是字符串构成
+                                                  # max_=10, # x轴最大值
+                                                  offset=10,  # 轴数值偏移
+                                                  name="品类",  # x轴名称
+                                                  ),
+                         yaxis_opts=opts.AxisOpts(axisline_opts=opts.AxisLineOpts(is_show=True, ),  # 是否显示「轴线条」
+                                                  splitline_opts=opts.SplitLineOpts(is_show=False),  # 去y轴网格线
+                                                  # type_="log",  # 设置为「对数轴」
+                                                  # is_show=True,  # y轴的轴身是否显示
+                                                  # min_=30, # y轴最小值，起始点非0
+                                                  # max_=200, # y轴最大值
+                                                  name="金额",  # y轴轴标题
+                                                  # axislabel_opts=opts.LabelOpts(formatter="{value}"),  # y轴标签格式单位
+                                                  ),
+                         # 互动提示，其它图表的参数一致可用。
+                         tooltip_opts=opts.TooltipOpts(trigger="axis",  # 鼠标移动时显示两轴标签
+                                                       axis_pointer_type="cross",
+                                                       # formatter="{b} {c}",  # 互动提示
+                                                       ),
+                         datazoom_opts=opts.DataZoomOpts(type_="inside", range_start=0, range_end=100),  # 滚轮缩放
+                         )
+    )
+    grid = Grid()  # 创建网格布局，偏移边距，使轴标签可以显示完全。
+    grid.add(l, grid_opts=opts.GridOpts(pos_left="10%", pos_right="10%"))
+    st_pyecharts(chart=grid, height=height, width="100%")
+
+
+# 面积图
+def line_simple_area(x_series, y1_title, y1_series, color1, y2_title, y2_series, color2, pic_title, height):
+    pic_title = "Line-面积图"
+    l = (
+        Line()
+        .add_xaxis(x_series)
+        .add_yaxis(y1_title, y1_series, color=color1, is_smooth=True, )
+        .add_yaxis(y2_title, y2_series, color=color2, is_smooth=True, )
+        .set_series_opts(
+            areastyle_opts=opts.AreaStyleOpts(opacity=0.1),  # 不透视度
+            label_opts=opts.LabelOpts(is_show=False),  # 不显示标签
+        )
+        .set_global_opts(title_opts=opts.TitleOpts(title=pic_title),  # 标题。 「方法： 全局设置」
+                         xaxis_opts=opts.AxisOpts(axisline_opts=opts.AxisLineOpts(is_show=True),  # 是否显示「轴线条」
+                                                  splitline_opts=opts.SplitLineOpts(is_show=False),  # 去x轴网格线
+                                                  axistick_opts=opts.AxisTickOpts(is_align_with_label=False, ),
+                                                  boundary_gap=False,  # 中间点于「轴还是中间」,True在网格中间
+                                                  is_show=True,  # x轴的轴身是否显示
+                                                  name="品类",  # x轴名称
+                                                  ),
+                         yaxis_opts=opts.AxisOpts(axisline_opts=opts.AxisLineOpts(is_show=True, ),  # 是否显示「轴线条」
+                                                  splitline_opts=opts.SplitLineOpts(is_show=False),  # 去y轴网格线
+                                                  # type_="log",  # 设置为「对数轴」
+                                                  # is_show=True,  # y轴的轴身是否显示
+                                                  # min_=30, # y轴最小值，起始点非0
+                                                  # max_=200, # y轴最大值
+                                                  name="金额",  # y轴轴标题
+                                                  # axislabel_opts=opts.LabelOpts(formatter="{value}"),  # y轴标签格式单位
+                                                  ),
+                         # 互动提示，其它图表的参数一致可用。
+                         tooltip_opts=opts.TooltipOpts(trigger="axis",  # 鼠标移动时显示两轴标签
+                                                       axis_pointer_type="cross",
+                                                       # formatter="{b} {c}",  # 互动提示
+                                                       ),
+                         datazoom_opts=opts.DataZoomOpts(type_="inside", range_start=0, range_end=100),  # 滚轮缩放
+                         )
+    )
+    grid = Grid()  # 创建网格布局，偏移边距，使轴标签可以显示完全。
+    grid.add(l, grid_opts=opts.GridOpts(pos_left="10%", pos_right="10%"))
+    st_pyecharts(chart=grid, height=height, width="100%")
 
 
 # 雨量图
@@ -239,113 +342,122 @@ def line_rain():
 
 
 # 双x轴
-def line_2_x_axis():
-    import pyecharts.options as opts
-    from pyecharts.charts import Line
-
-    # 将在 v1.1.0 中更改
-    from pyecharts.commons.utils import JsCode
-
-    """
-    Gallery 使用 pyecharts 1.0.0
-    参考地址: https://echarts.apache.org/examples/editor.html?c=multiple-x-axis
-
-    目前无法实现的功能:
-
-    1、暂无
-    """
-
-    js_formatter = """function (params) {
-            console.log(params);
-            return '降水量  ' + params.value + (params.seriesData.length ? '：' + params.seriesData[0].data : '');
-        }"""
-
+def line_2_x_axis(x_series, x2_series, y1_title, y1_series, color1, y2_title, y2_series, color2, pic_title, height):
+    pic_title = "Line-双x轴"
+    x_series = ["2016-1", "2016-2", "2016-3", "2016-4", "2016-5", "2016-6", "2016-7", ]
+    x2_series = ["2015-1", "2015-2", "2015-3", "2015-4", "2015-5", "2015-6", "2015-7", ]
     l = (
         Line()
-        .add_xaxis(
-            xaxis_data=["2016-1", "2016-2", "2016-3", "2016-4", "2016-5", "2016-6", "2016-7", "2016-8", "2016-9",
-                        "2016-10", "2016-11", "2016-12"], )
-        .extend_axis(
-            xaxis_data=["2015-1", "2015-2", "2015-3", "2015-4", "2015-5", "2015-6", "2015-7", "2015-8", "2015-9",
-                        "2015-10", "2015-11", "2015-12"],
-            xaxis=opts.AxisOpts(
-                type_="category",
-                axistick_opts=opts.AxisTickOpts(is_align_with_label=True),
-                axisline_opts=opts.AxisLineOpts(
-                    is_on_zero=False, linestyle_opts=opts.LineStyleOpts(color="#6e9ef1")
-                ),
-                axispointer_opts=opts.AxisPointerOpts(
-                    is_show=True, label=opts.LabelOpts(formatter=JsCode(js_formatter))
-                ),
-            ),
-        )
-        .add_yaxis(
-            series_name="2015 降水量",
-            is_smooth=True,
-            symbol="emptyCircle",
-            is_symbol_show=False,
-            # xaxis_index=1,
-            color="#d14a61",
-            y_axis=[2.6, 5.9, 9.0, 26.4, 28.7, 70.7, 175.6, 182.2, 48.7, 18.8, 6.0, 2.3],
-            label_opts=opts.LabelOpts(is_show=False),
-            linestyle_opts=opts.LineStyleOpts(width=2),
-        )
-        .add_yaxis(
-            series_name="2016 降水量",
-            is_smooth=True,
-            symbol="emptyCircle",
-            is_symbol_show=False,
-            color="#6e9ef1",
-            y_axis=[3.9, 5.9, 11.1, 18.7, 48.3, 69.2, 231.6, 46.6, 55.4, 18.4, 10.3, 0.7],
-            label_opts=opts.LabelOpts(is_show=False),
-            linestyle_opts=opts.LineStyleOpts(width=2),
-        )
-        .set_global_opts(
-            title_opts=opts.TitleOpts(title="Line-双x轴"),
-            legend_opts=opts.LegendOpts(),
-            tooltip_opts=opts.TooltipOpts(trigger="none", axis_pointer_type="cross"),
-            xaxis_opts=opts.AxisOpts(
-                type_="category",
-                axistick_opts=opts.AxisTickOpts(is_align_with_label=True),
-                axisline_opts=opts.AxisLineOpts(
-                    is_on_zero=False, linestyle_opts=opts.LineStyleOpts(color="#d14a61")
-                ),
-                axispointer_opts=opts.AxisPointerOpts(
-                    is_show=True, label=opts.LabelOpts(formatter=JsCode(js_formatter))
-                ),
-            ),
-            yaxis_opts=opts.AxisOpts(
-                type_="value",
-                splitline_opts=opts.SplitLineOpts(
-                    is_show=True, linestyle_opts=opts.LineStyleOpts(opacity=1)
-                ),
-            ),
-        )
-        # .render("multiple_x_axes.html")
+        .add_xaxis(xaxis_data=x_series, )
+        .extend_axis(xaxis_data=x2_series,
+                     xaxis=opts.AxisOpts(
+                         type_="category",
+                         axistick_opts=opts.AxisTickOpts(is_align_with_label=True),
+                         axisline_opts=opts.AxisLineOpts(is_on_zero=False,
+                                                         linestyle_opts=opts.LineStyleOpts(color=color2)),  # "#6e9ef1"
+                         axispointer_opts=opts.AxisPointerOpts(is_show=True,
+                                                               # label=opts.LabelOpts(formatter=JsCode(js_formatter))
+                                                               ), ),
+                     )
+        .add_yaxis(series_name=y1_title,
+                   y_axis=y1_series,
+                   color=color1,  # "#d14a61",
+                   is_smooth=True,
+                   # symbol="emptyCircle", # 默认即是圆点，不需要再说明。
+                   is_symbol_show=False,  # 标点(不显示）
+                   label_opts=opts.LabelOpts(is_show=True, color=color1),  # 标签显示
+                   linestyle_opts=opts.LineStyleOpts(width=2),  # 线条粗
+                   )
+        .add_yaxis(series_name=y2_title,
+                   y_axis=y2_series,
+                   color=color2,
+                   is_smooth=True,
+                   # symbol="emptyCircle", # 默认即是圆点，不需要再说明。
+                   is_symbol_show=False,
+                   label_opts=opts.LabelOpts(is_show=True, color=color2),  # 标签显示
+                   linestyle_opts=opts.LineStyleOpts(width=2),  # 线条粗
+                   )
+        .set_global_opts(title_opts=opts.TitleOpts(title=pic_title),
+                         # legend_opts=opts.LegendOpts(),
+                         tooltip_opts=opts.TooltipOpts(trigger="none", axis_pointer_type="cross"),
+                         xaxis_opts=opts.AxisOpts(type_="category",
+                                                  splitline_opts=opts.SplitLineOpts(is_show=False),  # 去x轴网格线
+                                                  axisline_opts=opts.AxisLineOpts(is_on_zero=True,
+                                                                                  linestyle_opts=opts.LineStyleOpts(
+                                                                                      color=color1)),
+                                                  axistick_opts=opts.AxisTickOpts(is_align_with_label=True),
+                                                  axispointer_opts=opts.AxisPointerOpts(is_show=True),
+                                                  ),
+                         yaxis_opts=opts.AxisOpts(type_="value",
+                                                  splitline_opts=opts.SplitLineOpts(
+                                                      is_show=False,  # y轴网格线
+                                                      linestyle_opts=opts.LineStyleOpts(opacity=1)),
+                                                  ),
+                         datazoom_opts=opts.DataZoomOpts(type_="inside", range_start=0, range_end=100),  # 滚轮缩放
+                         )
     )
-    st_pyecharts(l)
+    grid = Grid()  # 创建网格布局，偏移边距，使轴标签可以显示完全。
+    grid.add(l, grid_opts=opts.GridOpts(pos_left="10%", pos_right="10%"))
+    st_pyecharts(chart=grid, height=height, width="100%")
 
 
 # 阶梯图
-def line_step():
-    import pyecharts.options as opts
-    from pyecharts.charts import Line
-    from pyecharts.faker import Faker
-
-    x_data = [a + 1 for a in range(0, 12)]  # 生成12个月份的数字当轴， 这里有点问题
-    y_data = [b + random.randint(1, 10) for b in range(0, 12)]  # 这里要使用的是一个累计数据，
+def line_step(x_series, y1_title, y1_series, color1, pic_title, height):
+    x_series = [str(a + 1) + "月" for a in range(0, 12)]  # 生成12个月份的数字当轴， 这里有点问题
+    y1_series = [b + random.randint(1, 10) for b in range(0, 12)]  # 这里要使用的是一个累计数据，
+    pic_title = "Line-阶梯图"
     l = (
         Line()
-        .add_xaxis(x_data)
-        .add_yaxis("商家A", y_data, is_step=True)
-        .set_global_opts(title_opts=opts.TitleOpts(title="Line-阶梯图"))
-        # .render("line_step.html")
+        .add_xaxis(x_series)
+        .add_yaxis(y1_title, y1_series, color=color1, is_step=True)
+        .set_series_opts(label_opts=opts.LabelOpts(is_show=False),  # 标签。 「方法：「所有数据系列」的统一设置，会覆盖上方的系列内的设置
+                         # areastyle_opts=opts.AreaStyleOpts(opacity=0.3),  # 面积图，不透视明度，
+                         )
+
+        .set_global_opts(title_opts=opts.TitleOpts(title=pic_title),  # 标题。 「方法： 全局设置」
+                         # legend_opts=opts.LegendOpts(type_="scroll",  # 图例 -> 过长图例可滚动
+                         #                             orient="horizontal",  # 「图例」调整， # horizontal 水平，  vertical 垂直的
+                         #                             # selected_map={"商家B": False,  # 将某数据系列不显示
+                         #                             #               },
+                         #                             pos_left=None,  # 左边距，默认居中。 "35%"
+                         #                             pos_top=None,  # 上边距  "0%"
+                         #                             ),
+                         xaxis_opts=opts.AxisOpts(axisline_opts=opts.AxisLineOpts(is_show=True),  # 是否显示「轴线条」
+                                                  splitline_opts=opts.SplitLineOpts(is_show=False),  # 去x轴网格线
+                                                  axistick_opts=opts.AxisTickOpts(is_align_with_label=True),
+                                                  # 面积图是否「贴靠到轴」
+                                                  boundary_gap=True,  # 中间点于「轴还是中间」,True在网格中间
+                                                  is_show=True,  # x轴的轴身是否显示
+                                                  min_=0,  # x轴最小值，只在数值时起效   # 注意，横轴不能是数值，只能是字符串构成
+                                                  # max_=10, # x轴最大值
+                                                  offset=10,  # 轴数值偏移
+                                                  name="品类",  # x轴名称
+                                                  ),
+                         yaxis_opts=opts.AxisOpts(axisline_opts=opts.AxisLineOpts(is_show=True, ),  # 是否显示「轴线条」
+                                                  splitline_opts=opts.SplitLineOpts(is_show=False),  # 去y轴网格线
+                                                  # type_="log",  # 设置为「对数轴」
+                                                  # is_show=True,  # y轴的轴身是否显示
+                                                  # min_=30, # y轴最小值，起始点非0
+                                                  # max_=200, # y轴最大值
+                                                  name="金额",  # y轴轴标题
+                                                  # axislabel_opts=opts.LabelOpts(formatter="{value}"),  # y轴标签格式单位
+                                                  ),
+                         # 互动提示，其它图表的参数一致可用。
+                         tooltip_opts=opts.TooltipOpts(trigger="axis",  # 鼠标移动时显示两轴标签
+                                                       axis_pointer_type="cross",
+                                                       # formatter="{b} {c}",  # 互动提示 # 增加这个的互动效果差
+                                                       ),
+                         datazoom_opts=opts.DataZoomOpts(type_="inside", range_start=0, range_end=100),  # 滚轮缩放
+                         )
     )
-    st_pyecharts(l)
+
+    grid = Grid()  # 创建网格布局，偏移边距，使轴标签可以显示完全。
+    grid.add(l, grid_opts=opts.GridOpts(pos_left="10%", pos_right="10%"))
+    st_pyecharts(chart=grid, height=height, width="100%")
 
 
 # 标记点及辅助线
-def line_mark_point_line(x_series, y1_title, y1_series, color1, pic_title, height):
+def line_mark_point_line(x_series, y1_title, y1_series, color1, y2_title, y2_series, color2, pic_title, height):
     # x, y = Faker.choose(), Faker.values()
     l = (
         Line()
@@ -353,11 +465,11 @@ def line_mark_point_line(x_series, y1_title, y1_series, color1, pic_title, heigh
         .add_yaxis(
             y1_title,
             y1_series,
-            # color=color1,
+            color=color1,
             markpoint_opts=opts.MarkPointOpts(
                 data=[opts.MarkPointItem(name="指定标点", coord=[x[2], y[2]], value=y[2])]
             ),
-            markline_opts=opts.MarkLineOpts(data=[opts.MarkLineItem(type_="average")]), color='#111111',
+            markline_opts=opts.MarkLineOpts(data=[opts.MarkLineItem(type_="average")]),  # color='#111111',
         )
         .set_global_opts(title_opts=opts.TitleOpts(title="Line-标记点线"))
     )
@@ -473,88 +585,90 @@ def line_mark_area():
     st_pyecharts(l)
 
 
-def line_stype():
-    import pyecharts.options as opts
-    from pyecharts.charts import Line
-    from pyecharts.faker import Faker
-
+def line_stype(x_series, y1_title, y1_series, color1, pic_title, height):
+    pic_title = "Line-样式设置"
     l = (
         Line()
-        .add_xaxis(xaxis_data=Faker.choose())
+        .add_xaxis(xaxis_data=x_series)
         .add_yaxis(
-            "商家A",
-            Faker.values(),
+            y1_title,
+            y1_series,
             symbol="triangle",
-            symbol_size=20,
-            linestyle_opts=opts.LineStyleOpts(color="green", width=4, type_="dashed"),
+            symbol_size=10,  # 标点大小
+            linestyle_opts=opts.LineStyleOpts(
+                color=color1,  # color="green",
+                width=2,  # 连线线宽
+                curve=3,  # 曲度
+                type_="dash"  # 前冲动画，solid  实线。
+            ),
             itemstyle_opts=opts.ItemStyleOpts(
-                border_width=3, border_color="yellow", color="blue"
+                border_width=2,
+                border_color=color1,  # "yellow",
+                color=color1,  # "blue"
             ),
         )
-        .set_global_opts(title_opts=opts.TitleOpts(title="Line-样式设置"))
-        # .render("line_itemstyle.html")
+        .set_global_opts(title_opts=opts.TitleOpts(title=pic_title),  # 标题。 「方法： 全局设置」
+                         xaxis_opts=opts.AxisOpts(axisline_opts=opts.AxisLineOpts(is_show=True),  # 是否显示「轴线条」
+                                                  splitline_opts=opts.SplitLineOpts(is_show=False),  # 去x轴网格线
+                                                  axistick_opts=opts.AxisTickOpts(is_align_with_label=True),
+                                                  boundary_gap=True,  # 中间点于「轴还是中间」,True在网格中间
+                                                  is_show=True,  # x轴的轴身是否显示
+                                                  offset=10,  # 轴数值偏移
+                                                  name="品类",  # x轴名称
+                                                  ),
+                         yaxis_opts=opts.AxisOpts(axisline_opts=opts.AxisLineOpts(is_show=True, ),  # 是否显示「轴线条」
+                                                  splitline_opts=opts.SplitLineOpts(is_show=False),  # 去y轴网格线
+                                                  is_show=True,  # y轴的轴身是否显示
+                                                  name="金额",  # y轴轴标题
+                                                  ),
+                         # 互动提示，其它图表的参数一致可用。
+                         tooltip_opts=opts.TooltipOpts(trigger="axis",  # 鼠标移动时显示两轴标签
+                                                       axis_pointer_type="cross",
+                                                       # formatter="{b} {c}",  # 互动提示 # 增加这个的互动效果差
+                                                       ),
+                         datazoom_opts=opts.DataZoomOpts(type_="inside", range_start=0, range_end=100),  # 滚轮缩放
+                         )
     )
 
-    st_pyecharts(l)
+    grid = Grid()  # 创建网格布局，偏移边距，使轴标签可以显示完全。
+    grid.add(l, grid_opts=opts.GridOpts(pos_left="10%", pos_right="10%"))
+    st_pyecharts(chart=grid, height=height, width="100%")
 
 
-# 堆叠区域图
-def line_stack_area():
-    # 这里是总数
-    import pyecharts.options as opts
-    from pyecharts.charts import Line
-
-    x_data = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
-    y_data = [820, 932, 901, 934, 1290, 1330, 1320]
-
+# 多系列-累计堆积图
+def line_stack_area(x_series,
+                    y1_title, y1_series, color1,
+                    y2_title, y2_series, color2,
+                    y3_title, y3_series, color3,
+                    y4_title, y4_series, color4,
+                    pic_title, height):
+    pic_title = "Line-堆积图"
     l = (
         Line()
-        .add_xaxis(xaxis_data=x_data)
-        .add_yaxis(
-            series_name="邮件营销",
-            stack="总量",
-            y_axis=[120, 132, 101, 134, 90, 230, 210],
-            areastyle_opts=opts.AreaStyleOpts(opacity=0.5),
-            label_opts=opts.LabelOpts(is_show=False),
-        )
-        .add_yaxis(
-            series_name="联盟广告",
-            stack="总量",
-            y_axis=[220, 182, 191, 234, 290, 330, 310],
-            areastyle_opts=opts.AreaStyleOpts(opacity=0.5),
-            label_opts=opts.LabelOpts(is_show=False),
-        )
-        .add_yaxis(
-            series_name="视频广告",
-            stack="总量",
-            y_axis=[150, 232, 201, 154, 190, 330, 410],
-            areastyle_opts=opts.AreaStyleOpts(opacity=0.5),
-            label_opts=opts.LabelOpts(is_show=False),
-        )
-        .add_yaxis(
-            series_name="直接访问",
-            stack="总量",
-            y_axis=[320, 332, 301, 334, 390, 330, 320],
-            areastyle_opts=opts.AreaStyleOpts(opacity=0.5),
-            label_opts=opts.LabelOpts(is_show=False),
-        )
-        .add_yaxis(
-            series_name="搜索引擎",
-            stack="总量",
-            y_axis=[820, 932, 901, 934, 1290, 1330, 1320],
-            areastyle_opts=opts.AreaStyleOpts(opacity=0.5),
-            label_opts=opts.LabelOpts(is_show=True, position="top"),
-        )
-        .set_global_opts(
-            title_opts=opts.TitleOpts(title="Line-堆积图"),
-            tooltip_opts=opts.TooltipOpts(trigger="axis", axis_pointer_type="cross"),
-            yaxis_opts=opts.AxisOpts(
-                type_="value",
-                axistick_opts=opts.AxisTickOpts(is_show=True),
-                splitline_opts=opts.SplitLineOpts(is_show=True),
-            ),
-            xaxis_opts=opts.AxisOpts(type_="category", boundary_gap=False),
-        )
-        # .render("stacked_area_chart.html")
+        .add_xaxis(xaxis_data=x_series)
+        .add_yaxis(series_name=y1_title, y_axis=y1_series, color=color1, stack="stack1", is_symbol_show=False)
+        .add_yaxis(series_name=y2_title, y_axis=y2_series, color=color2, stack="stack1", is_symbol_show=False)
+        .add_yaxis(series_name=y3_title, y_axis=y3_series, color=color3, stack="stack1", is_symbol_show=False)
+        .add_yaxis(series_name=y4_title, y_axis=y4_series, color=color4, stack="stack1", is_symbol_show=False)
+        .set_series_opts(areastyle_opts=opts.AreaStyleOpts(opacity=0.1),  # 不透视度
+                         label_opts=opts.LabelOpts(is_show=False),  # 不显示标签
+                         )
+        .set_global_opts(title_opts=opts.TitleOpts(title=pic_title),
+                         legend_opts=opts.LegendOpts(orient="vertical",  # 「图例」调整,horizontal 水平，  vertical 垂直的
+                                                     pos_right="0%",  # 右边距
+                                                     pos_top="20%",   # 上边距
+                                                     selected_map={y4_title: False}  # 默认不显
+                                                     ),
+                         tooltip_opts=opts.TooltipOpts(trigger="axis", axis_pointer_type="cross"),
+                         yaxis_opts=opts.AxisOpts(type_="value",
+                                                  axistick_opts=opts.AxisTickOpts(is_show=True),
+                                                  splitline_opts=opts.SplitLineOpts(is_show=False), ),
+                         xaxis_opts=opts.AxisOpts(type_="category", boundary_gap=False,
+                                                  splitline_opts=opts.SplitLineOpts(is_show=False),
+                                                  ),
+                         )
+
     )
-    st_pyecharts(l)
+    grid = Grid()  # 创建网格布局，偏移边距，使轴标签可以显示完全。
+    grid.add(l, grid_opts=opts.GridOpts(pos_left="10%", pos_right="10%"))
+    st_pyecharts(chart=grid, height=height, width="100%")

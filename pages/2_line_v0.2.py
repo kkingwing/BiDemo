@@ -16,15 +16,19 @@ import pandas as pd
 import random
 
 x_series = Faker.choose()  # 数据系列
+x2_series = Faker.choose()  # 数据系列
 y1_series = Faker.values()
 y2_series = Faker.values()
 y3_series = Faker.values() * 3
+y4_series = Faker.values() * 3
 x_title = "x轴标题"
 y1_title = "商家A"
 y2_title = "商家B"
 y3_title = "商家C"
+y4_title = "商家D"
 pic_title = "图表标题"
 height = "310px"  # 图表高度
+
 
 def main():
     st.title("Line Demo")
@@ -33,42 +37,41 @@ def main():
         with col1:
             with st.container(border=True):
                 st.write("")
-                st.button("重置模拟数据",use_container_width=True,)
+                st.button("重置模拟数据", use_container_width=True, )
                 st.write("")
         with col2:
             with st.container(border=True):
                 color1, color2, color3, color4 = bar.choose_color_ulike()  # 色系组件，颜色选择器
-
 
     col1, col2, col3 = st.columns(3)
     with st.container(border=True):  # height=700,
         with col1:
             with st.container(border=True):  # height=700,
                 st.write('1组数据图')
-                line.line_base(x_series, y1_title, y1_series, color1, y2_title, y2_series, color2, pic_title, height)  # 基本示例
-                line.line_mark_point_line(x_series, y1_title, y1_series, color1, pic_title, height)  # 标记点
-                line.line_step()  # 阶梯图
-                line.line_stype()  # 风格设置 ，「虚线、数据点」样式
-                line.line_mark_area()  # 区域分段
-                # line.line_basic_area()  # 基本面积
-                # line.line_area()  # 圆弧面积图
-
+                line.line_single_base(x_series, y1_title, y1_series, color1, pic_title, height)  # 基本图
+                line.line_area(x_series, y1_title, y1_series, color1, pic_title, height)  # 面积图
+                line.line_step(x_series, y1_title, y1_series, color1, pic_title, height)  # 阶梯图
+                line.line_stype(x_series, y1_title, y1_series, color1, pic_title, height)  # 风格设置
 
         with col2:
             with st.container(border=True):  # height=700
                 st.write('2组数据图')
-
-                line.line_2_x_axis()  # 双x轴
-                line.line_simple_area()  # 面积图
-
+                # 基本示例
+                line.line_base(x_series, y1_title, y1_series, color1, y2_title, y2_series, color2, pic_title,
+                               height)
+                # 面积图
+                line.line_simple_area(x_series, y1_title, y1_series, color1, y2_title, y2_series, color2, pic_title,
+                                      height)
 
         with col3:
             with st.container(border=True):  # height=700,
                 st.write('3组数据图')
-
-                line.line_rain()  # 雨量图
-
-                line.line_stack_area()  # 堆积图
+                # 双x轴
+                line.line_2_x_axis(x_series, x2_series, y1_title, y1_series, color1, y2_title, y2_series, color2,
+                                   pic_title, height)
+                # 多系列-累计堆积图
+                line.line_stack_area(x_series, y1_title, y1_series, color1, y2_title, y2_series, color2, y3_title,
+                                     y3_series, color3, y4_title, y4_series, color4, pic_title, height)
 
 
 if __name__ == "__main__":

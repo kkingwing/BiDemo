@@ -2,13 +2,11 @@
 # v 0.2 重构为「以数据组数」为布局的模板。
 # v 0.1 基本模板。
 from demo_pyecharts import bar, line, pie, graph, map  # 导入各个不同demo的图表文件， 在st里这个导入方法是正确的
-
 import streamlit as st
 import inspect
 import textwrap
 
 from streamlit_echarts import st_pyecharts
-
 import pyecharts.options as opts
 from pyecharts.charts import Bar
 from pyecharts.faker import Faker
@@ -78,8 +76,7 @@ def main():
                                 height)  # 百分比
                 bar.bar_tool(x_series, y1_title, y1_series, color1, y2_title, y2_series, color2, pic_title,
                              height)  # 工具箱
-                bar.bar_reverse(x_series, y1_title, y1_series, color1, y2_title, y2_series, color2, pic_title,
-                                height)  # 条形图
+                bar.bar_reverse(x_series, y1_title, y1_series, color1, y2_title, y2_series, color2, pic_title,height)  # 条形图
                 bar.bar_waterfall(x_series, y1_title, y1_series, color1, y2_title, y2_series, color2, pic_title,
                                   height)  # 瀑布图
 

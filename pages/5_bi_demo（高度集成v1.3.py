@@ -7,15 +7,6 @@ from streamlit_echarts import st_pyecharts
 import pandas as pd
 from sqlalchemy import create_engine
 
-from pyecharts.commons.utils import JsCode
-
-# 定义一个 JavaScript 函数，用于将数值格式化为带有千分位分隔符的字符串
-formatter_qian = JsCode("""
-    function (value) {
-        return value.toLocaleString();
-    }
-""")
-
 st.set_page_config(
     page_title='Bi-Share',  # 浏览器的标签标题，
     page_icon='chart_with_upwards_trend',  # 标签图标，支持emoji
@@ -24,7 +15,6 @@ st.set_page_config(
     # menu_items={  # 右上角文字链接，键为固定字符串
     #     'Get Help': 'https://www.extremelycoolapp.com/help',
     # }
-
 )
 
 
